@@ -21,9 +21,13 @@ class RegistrationForm(forms.ModelForm):
         user = super().save(commit=True)
         user.set_password(self.cleaned_data["password"])
         user.save()
-
+        
+        from profiles.models import UserProfile
+        UserProfile.objects.create(user=user)
+        
         return user
     
+
 
 class LoginForm(forms.Form):
     username = forms.CharField(label="Email")

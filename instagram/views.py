@@ -1,13 +1,14 @@
 from django. shortcuts import render, HttpResponseRedirect
 
-from django.views.generic import TemplateView
-from django.views.generic.edit import CreateView, FormView
+from django.views.generic import TemplateView, DetailView
+from django.views.generic.edit import CreateView, FormView, UpdateView
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth import login, authenticate, logout
 
 from django.urls import reverse_lazy, reverse
 from .forms import RegistrationForm, LoginForm
+from profiles.models import UserProfile
 
 
 class HomeView(TemplateView):
@@ -57,6 +58,27 @@ class LegalView(TemplateView):
 
 class ContactView(TemplateView):
     template_name = "general/contact.html"
+
+
+
+class ProfileDetailView(DetailView):
+    model = UserProfile
+    template_name = "general/profile_detail.html"
+    context_object_name = 'profile' 
+
+
+
+class ProfileUpdateView(UpdateView):
+    model = UserProfile
+    template_name = "general/profile_update.html"
+    context_object_name = "profile"
+    fields = ['profile_picture', 'bio', 'birth_date']
+    def form_valid(self, form):
+        messages.add_message(self.request, messages.SUCCESS, "Perfil editado correctamente.")
+        return super(ProfileUpdateView, self).form_valid(form)
+    
+    def get_success_url(self):
+        return reverse('profile_detail', args=[self.object.pk])
 
 
 
