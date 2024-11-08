@@ -12,11 +12,13 @@
         <p>Fecha de Nacimiento {{ profile.birth_date|default_if_none:"Sin Rellenar" }}</p>
         <p>
             {% if profile.profile_picture %}
-                <img src="{{ profile.profile_picture }}" alt="">
+                <img width="200" src="{{ profile.profile_picture.url }}" alt="">
             {% else %}
                 No dispone de Imagen de Perfil
             {% endif %}
         </p>
         <p>Seguidores: {{ profile.following.count }}</p>
+
+        <a href="{% url 'profile_update' profile.pk %}">Editar Perfil</a>
     </div>
 {% endblock  %}
