@@ -4,6 +4,7 @@ from django.urls import path
 from .views import HomeView, LoginView, RegisterView, ContactView, LegalView, logout_view, ProfileDetailView, ProfileUpdateView
 from django.conf.urls.static import static
 from django.conf import settings
+from posts.views import PostCreateView
 
 
 urlpatterns = [
@@ -14,6 +15,7 @@ urlpatterns = [
     path('contact/', ContactView.as_view(), name = 'contact'),
     path('profile/<pk>/', ProfileDetailView.as_view(), name = 'profile_detail'),
     path('profile/update/<pk>/', ProfileUpdateView.as_view(), name='profile_update'),
+    path('posts/create/', PostCreateView.as_view(), name='post_create'),
     path('legal/', LegalView.as_view(), name = 'legal'),
 
 

@@ -7,7 +7,15 @@
     <div class="container">
         {% include '_includes/_messages.html' %}
 
-        <h1>Pagina Principal</h1>
-        <p>Estructura de la pagina</p>
+        <h1>Pagina principal</h1>
+        <p>Bienvenido</p>
+        <section>
+            <h2>Ultimas Publicaciones</h2>
+
+            {% for post in last_posts  %}
+                {% include '_includes/posts/_post.html' %}
+                <hr class="hr" />
+            {% endfor %}
+        </section>
     </div>
 {% endblock  %}

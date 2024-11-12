@@ -6,14 +6,24 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth import login, authenticate, logout
 
+from django.contrib.auth.decorators import login_required #login required para las urls que solo son de usuario registrado
+from django.utils.decorators import method_decorator
+
 from django.urls import reverse_lazy, reverse
 from .forms import RegistrationForm, LoginForm
 from profiles.models import UserProfile
+from posts.models import Post
 
 
 class HomeView(TemplateView):
     template_name = "general/home.html"
 
+    #Mostrar las 5 ultimas publicaicones en plantilla
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        last_posts = Post.objects.all().order_by('-created_at')[:5]
+        context['last_posts'] = last_posts
+        return context
 
 
 class LoginView(FormView):
@@ -61,6 +71,7 @@ class ContactView(TemplateView):
 
 
 
+@method_decorator(login_required, name='dispatch')
 class ProfileDetailView(DetailView):
     model = UserProfile
     template_name = "general/profile_detail.html"
@@ -68,6 +79,7 @@ class ProfileDetailView(DetailView):
 
 
 
+@method_decorator(login_required, name='dispatch')
 class ProfileUpdateView(UpdateView):
     model = UserProfile
     template_name = "general/profile_update.html"
@@ -82,6 +94,7 @@ class ProfileUpdateView(UpdateView):
 
 
 
+@method_decorator(login_required, name='dispatch')
 def logout_view(request):
     logout(request)
     messages.add_message(request, messages.INFO, "Se ha cerrado sesión correctamente.")
