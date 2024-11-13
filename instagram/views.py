@@ -1,6 +1,6 @@
 from django. shortcuts import render, HttpResponseRedirect
 
-from django.views.generic import TemplateView, DetailView
+from django.views.generic import TemplateView, DetailView, ListView
 from django.views.generic.edit import CreateView, FormView, UpdateView
 from django.contrib.auth.models import User
 from django.contrib import messages
@@ -80,11 +80,30 @@ class ProfileDetailView(DetailView):
 
 
 @method_decorator(login_required, name='dispatch')
+class ProfileListView(ListView):
+    model = UserProfile
+    template_name = "general/profile_list.html"
+    context_object_name = 'profiles' 
+
+    def get_queryset(self):
+        return UserProfile.objects.all().exclude(user=self.request.user)
+
+
+
+@method_decorator(login_required, name='dispatch')
 class ProfileUpdateView(UpdateView):
     model = UserProfile
     template_name = "general/profile_update.html"
     context_object_name = "profile"
     fields = ['profile_picture', 'bio', 'birth_date']
+
+    #Seguridad para que solo vayan a esta url si estan en el perfil creado
+    def dispatch(self, request, *args, **kwargs):
+        user_profile = self.get_object()
+        if user_profile.user != self.request.user:
+            return HttpResponseRedirect(reverse('home'))
+        return super().dispatch(request, *args, **kwargs)
+
     def form_valid(self, form):
         messages.add_message(self.request, messages.SUCCESS, "Perfil editado correctamente.")
         return super(ProfileUpdateView, self).form_valid(form)
@@ -94,7 +113,7 @@ class ProfileUpdateView(UpdateView):
 
 
 
-@method_decorator(login_required, name='dispatch')
+@login_required
 def logout_view(request):
     logout(request)
     messages.add_message(request, messages.INFO, "Se ha cerrado sesión correctamente.")
