@@ -1,16 +1,17 @@
-from django. shortcuts import render, HttpResponseRedirect
+from django. shortcuts import render, HttpResponseRedirect, get_object_or_404, redirect
 
 from django.views.generic import TemplateView, DetailView, ListView
 from django.views.generic.edit import CreateView, FormView, UpdateView
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth import login, authenticate, logout
+from django.views import View
 
 from django.contrib.auth.decorators import login_required #login required para las urls que solo son de usuario registrado
 from django.utils.decorators import method_decorator
 
 from django.urls import reverse_lazy, reverse
-from .forms import RegistrationForm, LoginForm
+from .forms import RegistrationForm, LoginForm, ProfileFollow
 from profiles.models import UserProfile
 from posts.models import Post
 
@@ -75,9 +76,41 @@ class ContactView(TemplateView):
 class ProfileDetailView(DetailView):
     model = UserProfile
     template_name = "general/profile_detail.html"
-    context_object_name = 'profile' 
+    context_object_name = 'profile'
 
 
+
+@method_decorator(login_required, name='dispatch')
+class FollowProfileView(View):
+    def post(self, request, *args, **kwargs):
+        profile_id = request.POST.get('profile_pk')
+        profile_to_follow = get_object_or_404(UserProfile, pk=profile_id)
+        
+        # Lógica para seguir al perfil
+        request.user.profile.follow(profile_to_follow)
+        
+        # Mensaje de éxito
+        messages.success(request, f'Has comenzado a seguir a {profile_to_follow.user.username}')
+        
+        # Redirige al perfil del usuario seguido o al perfil actual
+        return redirect(reverse('profile_detail', args=[profile_id]))
+
+# class ProfileDetailView(DetailView, FormView):
+#     model = UserProfile
+#     template_name = "general/profile_detail.html"
+#     context_object_name = "profile"
+#     form_class = ProfileFollow
+
+#     def form_valid(self, form):
+#         profile_pk = form.cleaned_data.get('profile_pk')
+#         profile = UserProfile.objects.get(pk=profile_pk)
+#         self.request.user.profile.follow(profile)
+
+#         messages.add_message(self.request, messages.SUCCESS, f'Usuario seguido correctamente.')
+#         return super(ProfileDetailView, self).form_valid(form)
+    
+#     def get_success_url(self):
+#         return reverse('profile_detail', args=[self.request.user.profile.pk])
 
 @method_decorator(login_required, name='dispatch')
 class ProfileListView(ListView):
@@ -109,7 +142,7 @@ class ProfileUpdateView(UpdateView):
         return super(ProfileUpdateView, self).form_valid(form)
     
     def get_success_url(self):
-        return reverse('profile_detail', args=[self.object.pk])
+        return reverse('profile_detail', args=[self.request.object.pk])
 
 
 
