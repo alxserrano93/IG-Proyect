@@ -18,27 +18,24 @@
                 No dispone de Imagen de Perfil
             {% endif %}
         </p>
+
         <p>Seguidores: {{ profile.following.count }}</p>
-
-
-        <p>Seguidos {{ profile.followers.count }}</p>
-        {% if profile.user != request.user %}
-            {% if profile not in request.user.profile.follower_set.all %}
-                <p>No sigues este perfil</p>
-                <p>
-                    <form method="post" action="{% url 'follow_profile' profile.pk %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="profile_pk" value="{{ profile.pk }}"> 
-                        <button type="submit">Seguir</button>
-                    </form>
-                </p>
-            {% endif %}
-        {% endif %}
-
         {% if profile.user == request.user %}
             <a href="{% url 'profile_update' profile.pk %}">Editar Perfil</a>
         {% endif %}
 
+
+        {% if profile.user != request.user %}
+            <form action="" method="post">
+                {% csrf_token %}
+                {{ form.profile_pk|as_crispy_field }}
+                    {% if following %}
+                        <button type="submit">Dejar de seguir</button>
+                    {% else %}
+                        <button type="submit">Seguir</button>
+                    {% endif %}
+            </form>
+        {% endif %}
 
         <section>
             <h2>Publicaciones</h2>
